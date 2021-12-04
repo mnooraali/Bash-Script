@@ -1,0 +1,459 @@
+mkdir kernal 2>> ./.error.log
+clear
+echo "....................WELCOME TO OUR SYSTEM................................"
+echo "                              "
+echo "                              "
+echo "                              "
+echo "                              "
+function DBMenu {
+  echo  "          --------OUR MENU IN SYSTEM-------------                "
+  echo " 1. Create Database                "
+  echo " 2. List Databases                 "
+  echo " 3. Connect To Databases                 "
+  echo " 4. Drop Database                   "
+  echo " 5. Exit                       "
+echo "                              "
+echo "                              "
+
+  echo "          ********************&&&***********************           "
+  echo  "Now Enter What Do You Want To Do....?"
+  read choice
+  case $choice in
+    1)create_db ;;
+    2)ls ./kernal ; DBMenu;;
+    3)connect_to_db;;
+    4)drop_db;;
+    5)exit ;;
+    *) echo " enter right Choice...! " ; mainMenu;
+  esac
+}
+#.........create database.......
+function create_db {
+  echo  "Enter Database Name You Want To Create: "
+  read name
+  mkdir ./kernal/$name
+  if [[ $? == 0 ]]
+  then
+    echo " GREET...Your Database $name Created Successfully"
+  else
+    echo "SORRY....You Have Error Creating Database $name"
+  fi
+      echo "                     "
+echo "*********************&&&****************************"
+echo " DO YOU WANT DO ANYTHING MORE..?"
+    echo "  1.YES... Back To main menu"
+  echo   "  2.NO... Exit "
+  read ch
+  case $ch in
+   1) clear;   DBMenu ;;
+   2) exit ;;
+     esac
+
+}
+
+
+#.............connect to database...........
+function connect_to_db {
+  echo  "Enter Database Name You Want To Go To: "
+  read name
+  cd ./kernal/$name 2>>./.error.log
+  if [[ $? == 0 ]]; then
+    echo "Welcome To $name DataBase"
+    tablesMenu
+  else
+    echo " Sorry...Database $name wasn't found"
+    echo "                     "
+echo "*********************&&&****************************"
+echo " DO YOU WANT DO ANYTHING MORE..?"
+    echo "  1.YES... Back To main menu"
+  echo   "  2.NO... Exit "
+  read ch
+  case $ch in
+   1) clear;   DBMenu ;;
+   2) exit ;;
+     esac
+
+  fi
+}
+function tablesMenu {
+  echo -e "        --------------------- Tables Menu----------------                   "
+  echo " 1. Create Table        "
+  echo " 2. List Tables         "
+  echo " 3. Drop Table          "
+  echo " 4  Insert into Table   "
+  echo " 5.Select From Table               "
+  echo " 6. Delete From Table          "
+  echo " 7.Update Table                "
+  echo " 8. Back To Main Menu          "
+  echo " 9. Exit                       "
+  echo "                              "
+  echo "                              "
+  echo "                              "
+  echo "********************&&&***********************"
+  echo  "Now Enter What Do You Want To Do....?"
+  read choice
+  case $choice in
+    1)  create_table ;;
+    2)  ls .; tablesMenu ;;
+    3)  drop_table;;
+    4)  insert_into_table;;
+    5)  clear; selectoption ;;
+    6)  delete_from_table;;
+    7)  update_table;;
+    8) clear; cd ../.. 2>>./.error.log; DBMenu ;;
+    9) exit ;;
+    *) echo "  enter right Choice...! " ; tablesMenu;
+  esac
+
+}
+#......create table......
+function create_table {
+  echo -e "Table Name: \c"
+  read tableName
+  if [[ -f $tableName ]]; then
+    echo " Sorry ..table  You Entered already existed ,Try another name"
+    tablesMenu
+  fi
+  echo  "Enter Number of Columns: "
+  read colsNum
+  counter=1
+  sep="||"
+  rSep=","
+  pKey=""
+  metaData="Field"$sep"Type"$sep"key"
+  while [ $counter -le $colsNum ]
+  do
+    echo  "Name of Column No.$counter: "
+    read colName
+
+    echo  "Type of Column $colName: "
+    select var in "int" "str"
+    do
+      case $var in
+        int ) colType="int";break;;
+        str ) colType="str";break;;
+        * ) echo "Enter Right Choice ....!" ;;
+      esac
+    done
+    if [[ $pKey == "" ]]; then
+      echo -e "Do You Want To Make It PrimaryKey ? "
+      select var in "Y" "N"
+      do
+        case $var in
+          Y ) pKey="PK";
+          metaData+=$rSep$colName$sep$colType$sep$pKey;
+          break;;
+          N )
+          metaData+=$rSep$colName$sep$colType$sep""
+          break;;
+          * ) echo "Enter Right Choice ....!" ;;
+        esac
+      done
+    else
+      metaData+=$rSep$colName$sep$colType$sep""
+    fi
+    if [[ $counter == $colsNum ]]; then
+      temp=$temp$colName
+    else
+      temp=$temp$colName$sep
+    fi
+    ((counter++))
+  done
+  touch .$tableName
+  echo -e $metaData  >> .$tableName
+  touch $tableName
+  echo -e $temp >> $tableName
+  if [[ $? == 0 ]]
+  then
+    echo "GREET....$tableName Table Created Successfully"
+    echo "                     "
+echo "*********************&&&****************************"
+echo " DO YOU WANT DO ANYTHING MORE..?"
+    echo "  1.YES... Back To table menu"
+  echo   "  2.NO... Exit "
+  read ch
+  case $ch in
+   1) clear;   tablesMenu ;;
+   2) exit ;;
+     esac
+
+  else
+    echo "SORRY....Error Creating Table $tableName"
+    echo "                     "
+echo "*********************&&&****************************"
+echo " DO YOU WANT DO ANYTHING MORE..?"
+    echo "  1.YES... Back To table menu"
+  echo   "  2.NO... Exit "
+  read ch
+  case $ch in
+   1) clear;   tablesMenu ;;
+   2) exit ;;
+     esac
+
+  fi
+}
+#..........drop table.................
+function drop_table {
+  echo -e "Enter Table Name Want To Drop: \c"
+  read tName
+  rm $tName .$tName 2>>./.error.log
+  if [[ $? == 0 ]]
+  then
+    echo "Table  $tName Dropped Successfully"
+  else
+    echo "Sorry Try Again ...!"
+  fi
+  echo "                     "
+echo "*********************&&&****************************"
+echo " DO YOU WANT DO ANYTHING MORE..?"
+    echo "  1.YES... Back To table menu"
+  echo   "  2.NO... Exit "
+  read ch
+  case $ch in
+   1) clear;   tablesMenu ;;
+   2) exit ;;
+     esac
+
+}
+#.................insert into table............
+function insert_into_table {
+  echo -e "Table Name: \c"
+  read tableName
+  if ! [[ -f $tableName ]]; then
+    echo "Table $tableName isn't existed ,choose another Table"
+    tablesMenu
+  fi
+  colsNum=`awk 'END{print NR}' .$tableName`
+  sep="|"
+  rSep=","
+  for (( i = 2; i <= $colsNum; i++ )); do
+    colName=$(awk 'BEGIN{FS="|"}{ if(NR=='$i') print $1}' .$tableName)
+    colType=$( awk 'BEGIN{FS="|"}{if(NR=='$i') print $2}' .$tableName)
+    colKey=$( awk 'BEGIN{FS="|"}{if(NR=='$i') print $3}' .$tableName)
+    echo -e "$colName ($colType) = \c"
+    read data
+
+    # Validate Input
+    if [[ $colType == "int" ]]; then
+      while ! [[ $data =~ ^[0-9]*$ ]]; do
+        echo -e "invalid DataType !!"
+        echo -e "$colName ($colType) = \c"
+        read data
+      done
+    fi
+
+    if [[ $colKey == "PK" ]]; then
+      while [[ true ]]; do
+        if [[ $data =~ ^[`awk 'BEGIN{FS="|" ; ORS=" "}{if(NR != 1)print $(('$i'-1))}' $tableName`]$ ]]; then
+          echo -e "invalid input for Primary Key !!"
+        else
+          break;
+        fi
+        echo -e "$colName ($colType) = \c"
+        read data
+      done
+    fi
+
+    #Set row
+    if [[ $i == $colsNum ]]; then
+      row=$row$data$rSep
+    else
+      row=$row$data$sep
+    fi
+  done
+  echo  $row"" >> $tableName
+  if [[ $? == 0 ]]
+  then
+    echo "GREET...Data Inserted Successfully In $tableName"
+  else
+    echo "Sorry...You Have Error To Insert Value InTO $tableName"
+  fi
+  row=""
+  echo "                     "
+echo "*********************&&&****************************"
+echo " DO YOU WANT DO ANYTHING MORE..?"
+    echo "  1.YES... Back To table menu"
+  echo   "  2.NO... Exit "
+  read ch
+  case $ch in
+   1) clear;   tablesMenu ;;
+   2) exit ;;
+     esac
+
+}
+function selectoption {
+  echo "          ---------------Select Menu--------------------           "
+  echo "             1. Select All Columns of a Table              "
+  echo "             2. Select Specific Column from a Table          "
+  echo "             3. Back To Tables Menu                        "
+  echo "             4. Back To Main Menu                          "
+  echo "             5. Exit                                       "
+  
+  echo  "Now Enter What Do You Want To Do....? "
+  read select_ch
+  case $select_ch in
+    1) selectAll ;;
+    2) select_spec_Column ;;
+    3) clear; tablesMenu ;;
+    4) clear; cd ../.. 2>>./.error.log;tablesMenu ;;
+    5) exit ;;
+    *) echo " Wrong Choice " ; selectoption;
+  esac
+}
+
+function selectAll {
+  echo "Enter Table Name Want To Select : "
+  read tName
+  column -t -s '|' $tName 2>>./.error.log
+  if [[ $? != 0 ]]
+  then
+    echo "Error Displaying Table $tName"
+  fi
+  echo "                     "
+echo "*********************&&&****************************"
+echo " DO YOU WANT DO ANYTHING MORE..?"
+    echo "  1.YES... Back To table menu"
+  echo   "  2.NO... Exit "
+  read ch
+  case $ch in
+   1) clear;   tablesMenu ;;
+   2) exit ;;
+     esac
+
+}
+
+function select_spec_Column {
+   echo  "Enter Table Name: "
+  read tName
+  echo  "Enter Column Number Want To Select : "
+  read colNum
+  awk 'BEGIN{FS="|"}{print $'$colNum'}' $tName
+  echo "                     "
+echo "*********************&&&****************************"
+echo " DO YOU WANT DO ANYTHING MORE..?"
+    echo "  1.YES... Back To table menu"
+  echo   "  2.NO... Exit "
+  read ch
+  case $ch in
+   1) clear;   tablesMenu ;;
+   2) exit ;;
+     esac
+
+
+}
+#..........delete from table...........
+function delete_from_table {
+  echo  "Enter Table Name: "
+  read tName
+  echo  "Enter Condition Column name: "
+  read field
+  fid=$(awk 'BEGIN{FS="|"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' $tName)
+  if [[ $fid == "" ]]
+  then
+    echo "SORRY...Not Found...!"
+    tablesMenu
+  else
+    echo  "Enter Condition Value: "
+    read val
+    res=$(awk 'BEGIN{FS="|"}{if ($'$fid'=="'$val'") print $'$fid'}' $tName 2>>./.error.log)
+    if [[ $res == "" ]]
+    then
+      echo" SORRY...Value You Entered Not Found...!"
+      tablesMenu
+    else
+      NR=$(awk 'BEGIN{FS="|"}{if ($'$fid'=="'$val'") print NR}' $tName 2>>./.error.log)
+      sed -i ''$NR'd' $tName 2>>./.error.log
+      echo "GREET...Row You Selected Deleted Successfully"
+      tablesMenu
+    fi
+  fi
+echo "                     "
+echo "*********************&&&****************************"
+echo " DO YOU WANT DO ANYTHING MORE..?"
+    echo "  1.YES... Back To table menu"
+  echo   "  2.NO... Exit "
+  read ch
+  case $ch in 
+   1) clear;   tablesMenu ;;
+   2) exit ;; 
+     esac
+}
+
+#..................Update...................
+
+function update_table  {
+  echo "Enter the Table Name You want to Update: "
+  read updatetable
+  echo "Enter Condition Column name: "
+  read field
+  fieldid=$(awk 'BEGIN{FS="|"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' $updatetable)
+  if [[ $fieldid == " " ]]
+  then
+    echo "SORRY...This Column is Not Found..Try Again..!"
+    tablesMenu
+  else
+    echo "Enter Your Condition Value: "
+    read val
+    result=$(awk 'BEGIN{FS="|"}{if ($'$fieldid'=="'$val'") print $'$fieldid'}' $updatetable 2>>./.error.log)
+    if [[ $result == " " ]]
+    then
+      echo "SORRY....The Entered Value Not Found.....!"
+      tablesMenu
+    else
+      echo "Enter the Required Field to set: "
+      read setfield
+      setFid=$(awk 'BEGIN{FS="|"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$setfield'") print i}}}' $updatetable)
+      if [[ $setFid == " " ]]
+      then
+        echo "SORRY...This Field Not Found...!"
+        tablesMenu
+      else
+        echo "Enter new Value Want to set: "
+        read newvalue
+        NR=$(awk 'BEGIN{FS="|"}{if ($'$fieldid' == "'$val'") print NR}' $updatetable 2>>./.error.log)
+        oldvalue=$(awk 'BEGIN{FS="|"}{if(NR=='$NR'){for(i=1;i<=NF;i++){if(i=='$setFid') print $i}}}' $updatetable 2>>./.error.log)
+        echo $oldvalue
+        sed -i ''$NR's/'$oldvalue'/'$newvalue'/g' $updatetable 2>>./.error.log
+        echo "GREET....New Value is Successfully Updated.. "
+        
+      fi
+    fi
+  fi
+  echo "                     "
+echo "*********************&&&****************************"
+echo " DO YOU WANT DO ANYTHING MORE..?"
+    echo "  1.YES... Back To table Menu"
+  echo   "  2.NO... Exit "
+  read ch
+  case $ch in
+   1) clear;  tablesMenu ;;
+   2) exit ;;
+     esac
+}
+
+
+
+
+#.........drop database.............
+function drop_db {
+  echo  "Enter Database Name: "
+  read name
+  rm -r ./kernal/$name 2>>./.error.log
+  if [[ $? == 0 ]]; then
+    echo "Database Dropped Successfully"
+  else
+    echo "Database Not found ..Try Again..!"
+  fi
+ echo "                     "
+echo "*********************&&&****************************"
+echo " DO YOU WANT DO ANYTHING MORE..?"
+    echo "  1.YES... Back To Main Menu"
+  echo   "  2.NO... Exit "
+  read ch
+  case $ch in
+   1) clear;  DBMenu ;;
+   2) exit ;;
+     esac
+
+}
+DBMenu
